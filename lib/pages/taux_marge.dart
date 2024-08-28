@@ -109,6 +109,12 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
     });
   }
 
+  String formatValue(double value, int decimalPlaces) {
+    return value.isNaN || value.isInfinite
+        ? '0'
+        : value.toStringAsFixed(decimalPlaces);
+  }
+
   /// Gère le changement de page et effectue le calcul approprié.
   void onPageChanged(int index) {
     isTauxMargeSelected = index == 0;
@@ -122,12 +128,6 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
     } else if (isCoefficientSelected) {
       _calculateFromCoefficient();
     }
-  }
-
-  String formatValue(double value, int decimalPlaces) {
-    return value.isNaN || value.isInfinite
-        ? '0'
-        : value.toStringAsFixed(decimalPlaces);
   }
 
   @override
