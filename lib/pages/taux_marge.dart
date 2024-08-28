@@ -219,17 +219,37 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
                         : 2);
               },
             ),
-            const SizedBox(height: 20),
-            Text(
-                "Prix de Vente HT: ${NumberFormat.decimalPattern('fr').format(prixVenteHT)}"),
-            Text(
-                "Prix de Vente TTC: ${NumberFormat.decimalPattern('fr').format(prixVenteTTC)}"),
-            Text("Marge: ${marge.toStringAsFixed(6)}"),
-            Text("Coefficient: ${coefficient.toStringAsFixed(1)}"),
-            Text("Taux de Marge: ${tauxMarge.toStringAsFixed(0)}%"),
+            SizedBox(height: 20),
+            _InfoLine("Prix de Vente HT:", prixVenteHT),
+            _InfoLine("Prix de Vente TTC:", prixVenteTTC),
+            _InfoLine("Marge:", marge),
+            _InfoLine("Coefficient:", coefficient),
+            _InfoLine("Taux de Marge:", tauxMarge),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _InfoLine extends StatelessWidget {
+  final String label;
+  final dynamic value;
+
+  _InfoLine(this.label, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(label, style: TextStyle(fontSize: 16)),
+        Text(
+          value is num
+              ? NumberFormat.decimalPattern('fr').format(value)
+              : value.toString(),
+          style: TextStyle(fontSize: 16),
+        ),
+      ],
     );
   }
 }
