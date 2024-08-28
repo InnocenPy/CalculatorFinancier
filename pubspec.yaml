@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   toggle_switch: ^2.3.0 # Vérifiez la dernière version sur pub.dev
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:

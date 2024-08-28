@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class TauxDeMargePage extends StatefulWidget {
@@ -219,8 +220,10 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
               },
             ),
             const SizedBox(height: 20),
-            Text("Prix de Vente HT: ${prixVenteHT.toStringAsFixed(6)}"),
-            Text("Prix de Vente TTC: ${prixVenteTTC.toStringAsFixed(6)}"),
+            Text(
+                "Prix de Vente HT: ${NumberFormat.decimalPattern('fr').format(prixVenteHT)}"),
+            Text(
+                "Prix de Vente TTC: ${NumberFormat.decimalPattern('fr').format(prixVenteTTC)}"),
             Text("Marge: ${marge.toStringAsFixed(6)}"),
             Text("Coefficient: ${coefficient.toStringAsFixed(1)}"),
             Text("Taux de Marge: ${tauxMarge.toStringAsFixed(0)}%"),
