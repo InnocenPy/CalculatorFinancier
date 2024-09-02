@@ -1,5 +1,6 @@
 import 'package:demo_test/pages/dividende.dart';
 import 'package:demo_test/pages/emprunt.dart';
+import 'package:demo_test/pages/salarie.dart';
 import 'package:demo_test/pages/taux_marge.dart';
 import 'package:flutter/material.dart';
 
@@ -33,8 +34,29 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.deepPurple[300],
         elevation: 0,
         title: const Text('E M P R U N T'),
-        leading: IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
+        // leading: IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
         actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.person))],
+      ),
+      drawer: Drawer(
+        child: Container(
+          color: Colors.deepPurple[100],
+          child: ListView(
+            children: [
+              const DrawerHeader(
+                  child: Text(
+                "C A L C U L E",
+                style: TextStyle(fontSize: 25),
+              )),
+              ListTile(
+                  leading: const Icon(Icons.next_week_rounded),
+                  title: const Text('Salarie'),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const SalariePage()));
+                  }),
+            ],
+          ),
+        ),
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
