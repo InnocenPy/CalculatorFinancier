@@ -1,3 +1,4 @@
+import 'package:demo_test/pages/cout_employe.dart';
 import 'package:demo_test/pages/dividende.dart';
 import 'package:demo_test/pages/emprunt.dart';
 import 'package:demo_test/pages/salarie.dart';
@@ -46,13 +47,21 @@ class _HomePageState extends State<HomePage> {
                   child: Text(
                 "C A L C U L E",
                 style: TextStyle(fontSize: 25),
+                textAlign: TextAlign.center,
               )),
               ListTile(
-                  leading: const Icon(Icons.next_week_rounded),
+                  leading: const Icon(Icons.next_week_outlined),
                   title: const Text('Salarie'),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => const CalculSalairePage()));
+                  }),
+              ListTile(
+                  leading: const Icon(Icons.person_pin),
+                  title: const Text('Coût employeur'),
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const CoutEmployeurPage()));
                   }),
             ],
           ),
