@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
                   title: const Text('Salarie'),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const SalariePage()));
+                        builder: (context) => const CalculSalairePage()));
                   }),
             ],
           ),
