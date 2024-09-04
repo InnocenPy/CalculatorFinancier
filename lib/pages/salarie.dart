@@ -65,17 +65,59 @@ class _CalculSalairePageState extends State<CalculSalairePage> {
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        border: OutlineInputBorder(),
+        border: const OutlineInputBorder(),
         labelText: label,
       ),
       onChanged: onChanged,
     );
   }
 
+  Widget _buildTextFieldReadonly({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.brown, // Définit la couleur du texte
+            ),
+            textAlign: TextAlign.center, // Centre le texte horizontalement
+          ),
+        ),
+        TextField(
+          readOnly: true, // Champ en lecture seule
+          controller: controller,
+          style:
+              const TextStyle(color: Colors.white), // Couleur du texte en blanc
+          decoration: const InputDecoration(
+            fillColor: Colors.brown, // Couleur de fond marron
+            filled: true, // Activer le remplissage de la couleur de fond
+            labelStyle: TextStyle(
+              color: Colors.white, // Couleur du texte du label en blanc
+              fontSize: 16, // Taille du texte du label
+            ),
+            floatingLabelAlignment: FloatingLabelAlignment.center,
+
+            border: InputBorder.none, // Pas de bordure
+            //labelText: label,
+            alignLabelWithHint:
+                true, // Pour aligner le label avec le hint et centrer
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Calcul Salaire Brut/Net")),
+      appBar: AppBar(title: const Text("Calcul Salaires Brut/Net")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -83,6 +125,7 @@ class _CalculSalairePageState extends State<CalculSalairePage> {
             ToggleSwitch(
               initialLabelIndex: isCalculFromBrut ? 0 : 1,
               labels: ['Brut', 'Net'],
+              activeBgColor: [Colors.brown],
               onToggle: (index) {
                 _onToggleSwitch(index!);
               },
@@ -115,11 +158,10 @@ class _CalculSalairePageState extends State<CalculSalairePage> {
                   setState(() {}); // Update state after calculation
                 },
               ),
-              const SizedBox(height: 20),
-              Text(
-                "Salaire Net (avant prélèvement de l'ITS): ${salaireNetController.text}",
-                style: const TextStyle(fontSize: 18),
-              ),
+              const SizedBox(height: 40),
+              _buildTextFieldReadonly(
+                  controller: salaireNetController,
+                  label: 'Salaire Net (avant prélèvement de ITS)'),
             ] else ...[
               _buildTextField(
                 controller: salaireNetController,
@@ -147,11 +189,9 @@ class _CalculSalairePageState extends State<CalculSalairePage> {
                   setState(() {}); // Update state after calculation
                 },
               ),
-              const SizedBox(height: 20),
-              Text(
-                "Salaire Brut: ${salaireBrutController.text}",
-                style: const TextStyle(fontSize: 18),
-              ),
+              const SizedBox(height: 40),
+              _buildTextFieldReadonly(
+                  controller:  salaireBrutController, label: 'Salaire Brut')
             ],
           ],
         ),

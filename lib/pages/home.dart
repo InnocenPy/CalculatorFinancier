@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
                 textAlign: TextAlign.center,
               )),
               ListTile(
-                  leading: const Icon(Icons.next_week_outlined),
+                  leading: const Icon(Icons.account_balance_sharp),
                   title: const Text('Salarie'),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
                   title: const Text('Coût employeur'),
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const CoutEmployeurPage()));
+                        builder: (context) => CoutEmployeurPage()));
                   }),
             ],
           ),

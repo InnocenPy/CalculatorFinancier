@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class DividendePage extends StatefulWidget {
@@ -64,6 +65,61 @@ class _DividendePageState extends State<DividendePage> {
     }
   }
 
+  String formatValue(double value, int decimalPlaces) {
+    // Vérifier si la valeur est NaN (Not a Number) ou infinie
+    if (value.isNaN || value.isInfinite) {
+      return '0';
+    }
+
+    // Arrondir la valeur au nombre de décimales spécifié
+    double roundedValue = double.parse(value.toStringAsFixed(decimalPlaces));
+
+    // Formater la valeur arrondie avec le séparateur de milliers
+    return NumberFormat.decimalPattern('fr').format(roundedValue);
+  }
+
+  Widget _buildTextFieldReadonly({
+    required TextEditingController controller,
+    required String label,
+  }) {
+    return Column(
+      children: [
+        Center(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.brown, // Définit la couleur du texte
+            ),
+            textAlign: TextAlign.center, // Centre le texte horizontalement
+          ),
+        ),
+        TextField(
+          readOnly: true, // Champ en lecture seule
+          controller: controller,
+          style:
+              const TextStyle(color: Colors.white), // Couleur du texte en blanc
+          decoration: const InputDecoration(
+            fillColor: Colors.brown, // Couleur de fond marron
+            filled: true, // Activer le remplissage de la couleur de fond
+            labelStyle: TextStyle(
+              color: Colors.white, // Couleur du texte du label en blanc
+              fontSize: 16, // Taille du texte du label
+            ),
+            floatingLabelAlignment: FloatingLabelAlignment.center,
+
+            border: InputBorder.none, // Pas de bordure
+            //labelText: label,
+            alignLabelWithHint:
+                true, // Pour aligner le label avec le hint et centrer
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,8 +129,9 @@ class _DividendePageState extends State<DividendePage> {
         child: Column(
           children: [
             ToggleSwitch(
+              activeBgColor: [Colors.brown],
               initialLabelIndex: isBrutSelected ? 0 : 1,
-              labels: const ['Dividende Brut', 'Dividende Net'],
+              labels: const ['Brut', 'Net'],
               onToggle: (index) {
                 isBrutSelected = index == 0;
                 onPageChanged(index!);
@@ -114,10 +171,33 @@ class _DividendePageState extends State<DividendePage> {
               },
             ),
             const SizedBox(height: 20),
-            Text("Montant IRVM: ${montantIRVM}"),
-            Text(isBrutSelected
-                ? "Montant Dividende Net: $montantNet"
-                : "Montant Dividendes Bruts: ${montantBrut}"),
+            _buildTextFieldReadonly(
+                controller:
+                    TextEditingController(text: formatValue(montantIRVM, 0)),
+                label: 'Montant IRVM'),
+            // Text("Montant IRVM: ${montantIRVM} "),
+            // _buildTextFieldReadonly(
+            //     controller: TextEditingController(
+            //       text: formatValue(montantNet, 0),
+            //     ),
+            //     label: 'Montant Dividende Net'),
+            // Text(isBrutSelected
+            //     ? "Montant Dividende Net: $montantNet"
+            //     : "Montant Dividendes Bruts: ${montantBrut}"),
+            // _buildTextFieldReadonly(
+            //     controller: montantControllerBrut,
+            //     label: 'Montant Dividendes Bruts'),
+            _buildTextFieldReadonly(
+                controller: isBrutSelected
+                    ? TextEditingController(
+                        text: formatValue(montantNet, 0),
+                      )
+                    : TextEditingController(
+                        text: formatValue(montantBrut, 0),
+                      ),
+                label: isBrutSelected
+                    ? 'Montant Dividende Net'
+                    : 'Montant Dividendes Bruts')
           ],
         ),
       ),
