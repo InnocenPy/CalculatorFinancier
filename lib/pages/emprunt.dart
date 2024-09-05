@@ -63,7 +63,7 @@ class _SimulationEmpruntPageState extends State<SimulationEmpruntPage> {
                 cursorColor: Colors.blue,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: 'Montant emprunte',
+                  labelText: 'montant.emprunt',
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [

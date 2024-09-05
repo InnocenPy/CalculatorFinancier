@@ -61,6 +61,8 @@ class _DividendePageState extends State<DividendePage> {
     double? brut = double.tryParse(cbrut);
 
     if (brut == null) {
+      setState(() {});
+
       _showError("Veuillez entrer un montant brut valide.");
       return;
     }
@@ -87,7 +89,10 @@ class _DividendePageState extends State<DividendePage> {
       double? net = double.tryParse(cnet);
 
       if (net == null) {
+        setState(() {});
+
         _showError("Veuillez entrer un montant brut valide.");
+
         return;
       }
 
