@@ -48,39 +48,53 @@ class _DividendePageState extends State<DividendePage> {
 
   /// Calcul du montant net à partir du montant brut et du taux.
   void _calculateFromBrut() {
-    if (montantControllerBrut.text.isNotEmpty) {
-      String cbrut = montantControllerBrut.text
-          .replaceAll(RegExp(r"\s+"), "")
-          .replaceAll(',', '.');
-      double? brut = double.tryParse(cbrut);
-
-      if (brut != null) {
-        montantIRVM = brut * selectedTaux;
-        montantNet = brut - montantIRVM;
-        montantControllerNet.text = formatValue(montantNet, 0);
-        setState(() {});
-      } else {
-        _showError("Veuillez entrer un montant brut valide.");
-      }
+    if (montantControllerBrut.text.isEmpty || selectedTaux == null) {
+      montantNet = 0;
+      montantControllerNet.text = formatValue(montantNet, 0);
+      setState(() {});
+      return;
     }
+
+    String cbrut = montantControllerBrut.text
+        .replaceAll(RegExp(r"\s+"), "")
+        .replaceAll(',', '.');
+    double? brut = double.tryParse(cbrut);
+
+    if (brut == null) {
+      _showError("Veuillez entrer un montant brut valide.");
+      return;
+    }
+
+    montantIRVM = brut * selectedTaux;
+    montantNet = brut - montantIRVM;
+    montantControllerNet.text = formatValue(montantNet, 0);
+    setState(() {});
   }
 
   /// Calcul du montant brut à partir du montant net et du taux.
   void _calculateFromNet() {
+    if (montantControllerNet.text.isEmpty || selectedTaux == null) {
+      montantNet = 0;
+      montantControllerBrut.text = formatValue(montantNet, 0);
+      setState(() {});
+      return;
+    }
+
     if (montantControllerNet.text.isNotEmpty) {
       String cnet = montantControllerNet.text
           .replaceAll(RegExp(r"\s+"), "")
           .replaceAll(',', '.');
       double? net = double.tryParse(cnet);
 
-      if (net != null) {
-        montantBrut = net / (1 - selectedTaux);
-        montantIRVM = montantBrut * selectedTaux;
-        montantControllerBrut.text = formatValue(montantBrut, 0);
-        setState(() {});
-      } else {
-        _showError("Veuillez entrer un montant net valide.");
+      if (net == null) {
+        _showError("Veuillez entrer un montant brut valide.");
+        return;
       }
+
+      montantBrut = net / (1 - selectedTaux);
+      montantIRVM = montantBrut * selectedTaux;
+      montantControllerBrut.text = formatValue(montantBrut, 0);
+      setState(() {});
     }
   }
 
