@@ -124,6 +124,7 @@ class _CoutEmployeurPageState extends State<CoutEmployeurPage> {
     });
   }
 
+  // Pour les input numerique
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -154,6 +155,7 @@ class _CoutEmployeurPageState extends State<CoutEmployeurPage> {
     );
   }
 
+  // Pour les input en lecture unique
   Widget _buildTextFieldReadonly({
     required TextEditingController controller,
     required String label,
@@ -221,7 +223,7 @@ class _CoutEmployeurPageState extends State<CoutEmployeurPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Calcul Salaire / Coût Employeur")),
+      appBar: AppBar(title: const Text("Calcul salaire / Coût employeur")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

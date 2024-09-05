@@ -29,6 +29,23 @@ class _DividendePageState extends State<DividendePage> {
     super.dispose();
   }
 
+  /// Méthode générique pour obtenir une valeur numérique depuis un contrôleur.
+  double _parseInputValue(TextEditingController controller,
+      {double fallback = 0}) {
+    String cleanedValue =
+        controller.text.replaceAll(RegExp(r"\s+"), "").replaceAll(',', '.');
+    return double.tryParse(cleanedValue) ?? fallback;
+  }
+
+  /// Pour formater la valeur avec des espaces
+  String formatValue(double value, int fractionDigits) {
+    return NumberFormat.currency(
+      locale: 'fr_FR',
+      symbol: '',
+      decimalDigits: fractionDigits,
+    ).format(value);
+  }
+
   /// Calcul du montant net à partir du montant brut et du taux.
   void _calculateFromBrut() {
     if (montantControllerBrut.text.isNotEmpty) {
@@ -40,7 +57,7 @@ class _DividendePageState extends State<DividendePage> {
       if (brut != null) {
         montantIRVM = brut * selectedTaux;
         montantNet = brut - montantIRVM;
-        montantControllerNet.text = montantNet.toStringAsFixed(0);
+        montantControllerNet.text = formatValue(montantNet, 0);
         setState(() {});
       } else {
         _showError("Veuillez entrer un montant brut valide.");
@@ -59,7 +76,7 @@ class _DividendePageState extends State<DividendePage> {
       if (net != null) {
         montantBrut = net / (1 - selectedTaux);
         montantIRVM = montantBrut * selectedTaux;
-        montantControllerBrut.text = montantBrut.toStringAsFixed(0);
+        montantControllerBrut.text = formatValue(montantBrut, 0);
         setState(() {});
       } else {
         _showError("Veuillez entrer un montant net valide.");
@@ -77,13 +94,13 @@ class _DividendePageState extends State<DividendePage> {
     }
   }
 
-  String formatValue(double value, int decimalPlaces) {
-    if (value.isNaN || value.isInfinite) {
-      return '0';
-    }
-    double roundedValue = double.parse(value.toStringAsFixed(decimalPlaces));
-    return NumberFormat.decimalPattern('fr').format(roundedValue);
-  }
+  // String formatValue(double value, int decimalPlaces) {
+  //   if (value.isNaN || value.isInfinite) {
+  //     return '0';
+  //   }
+  //   double roundedValue = double.parse(value.toStringAsFixed(decimalPlaces));
+  //   return NumberFormat.decimalPattern('fr').format(roundedValue);
+  // }
 
   Widget _buildTextFieldReadonly({
     required TextEditingController controller,
