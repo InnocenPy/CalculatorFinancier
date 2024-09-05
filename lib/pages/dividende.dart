@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:number_text_input_formatter/number_text_input_formatter.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class DividendePage extends StatefulWidget {
@@ -30,29 +31,40 @@ class _DividendePageState extends State<DividendePage> {
 
   /// Calcul du montant net à partir du montant brut et du taux.
   void _calculateFromBrut() {
-    double brut = double.tryParse(montantControllerBrut.text) ?? 0;
-    montantIRVM =
-        brut * selectedTaux; // Montant IRVM = Dividende Brut * Taux IRVM
-    montantNet = brut -
-        montantIRVM; // Montant Dividende Net = Dividende Brut - Montant IRVM
+    if (montantControllerBrut.text.isNotEmpty) {
+      String cbrut = montantControllerBrut.text
+          .replaceAll(RegExp(r"\s+"), "")
+          .replaceAll(',', '.');
+      double? brut = double.tryParse(cbrut);
 
-    montantControllerNet.text = montantNet.toStringAsFixed(0);
-
-    setState(() {});
+      if (brut != null) {
+        montantIRVM = brut * selectedTaux;
+        montantNet = brut - montantIRVM;
+        montantControllerNet.text = montantNet.toStringAsFixed(0);
+        setState(() {});
+      } else {
+        _showError("Veuillez entrer un montant brut valide.");
+      }
+    }
   }
 
   /// Calcul du montant brut à partir du montant net et du taux.
   void _calculateFromNet() {
-    double net = double.tryParse(montantControllerNet.text) ?? 0;
-    montantBrut = net /
-        (1 -
-            selectedTaux); // Montant Dividendes Bruts = Dividende Net / (100% - Taux IRVM)
-    montantIRVM = montantBrut *
-        selectedTaux; // Montant IRVM = (Dividende Net / (100% - Taux IRVM)) * Taux IRVM
+    if (montantControllerNet.text.isNotEmpty) {
+      String cnet = montantControllerNet.text
+          .replaceAll(RegExp(r"\s+"), "")
+          .replaceAll(',', '.');
+      double? net = double.tryParse(cnet);
 
-    montantControllerBrut.text = montantBrut.toStringAsFixed(0);
-
-    setState(() {});
+      if (net != null) {
+        montantBrut = net / (1 - selectedTaux);
+        montantIRVM = montantBrut * selectedTaux;
+        montantControllerBrut.text = montantBrut.toStringAsFixed(0);
+        setState(() {});
+      } else {
+        _showError("Veuillez entrer un montant net valide.");
+      }
+    }
   }
 
   /// Gère le changement de page et effectue le calcul approprié.
@@ -66,15 +78,10 @@ class _DividendePageState extends State<DividendePage> {
   }
 
   String formatValue(double value, int decimalPlaces) {
-    // Vérifier si la valeur est NaN (Not a Number) ou infinie
     if (value.isNaN || value.isInfinite) {
       return '0';
     }
-
-    // Arrondir la valeur au nombre de décimales spécifié
     double roundedValue = double.parse(value.toStringAsFixed(decimalPlaces));
-
-    // Formater la valeur arrondie avec le séparateur de milliers
     return NumberFormat.decimalPattern('fr').format(roundedValue);
   }
 
@@ -90,33 +97,34 @@ class _DividendePageState extends State<DividendePage> {
             style: const TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
-              color: Colors.brown, // Définit la couleur du texte
+              color: Colors.brown,
             ),
-            textAlign: TextAlign.center, // Centre le texte horizontalement
+            textAlign: TextAlign.center,
           ),
         ),
         TextField(
-          readOnly: true, // Champ en lecture seule
+          readOnly: true,
           controller: controller,
-          style:
-              const TextStyle(color: Colors.white), // Couleur du texte en blanc
+          style: const TextStyle(color: Colors.white),
           decoration: const InputDecoration(
-            fillColor: Colors.brown, // Couleur de fond marron
-            filled: true, // Activer le remplissage de la couleur de fond
+            fillColor: Colors.brown,
+            filled: true,
             labelStyle: TextStyle(
-              color: Colors.white, // Couleur du texte du label en blanc
-              fontSize: 16, // Taille du texte du label
+              color: Colors.white,
+              fontSize: 16,
             ),
             floatingLabelAlignment: FloatingLabelAlignment.center,
-
-            border: InputBorder.none, // Pas de bordure
-            //labelText: label,
-            alignLabelWithHint:
-                true, // Pour aligner le label avec le hint et centrer
+            border: InputBorder.none,
           ),
           textAlign: TextAlign.center,
         ),
       ],
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -142,6 +150,20 @@ class _DividendePageState extends State<DividendePage> {
               controller:
                   isBrutSelected ? montantControllerBrut : montantControllerNet,
               keyboardType: TextInputType.number,
+              inputFormatters: [
+                NumberTextInputFormatter(
+                  integerDigits: 10,
+                  decimalDigits: 2,
+                  maxValue: '10000000000.00',
+                  decimalSeparator: ',',
+                  groupDigits: 3,
+                  groupSeparator: ' ',
+                  allowNegative: false,
+                  overrideDecimalPoint: false,
+                  insertDecimalPoint: false,
+                  insertDecimalDigits: false,
+                ),
+              ],
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
                 labelText: isBrutSelected ? 'Dividende Brut' : 'Dividende Net',
@@ -172,32 +194,22 @@ class _DividendePageState extends State<DividendePage> {
             ),
             const SizedBox(height: 20),
             _buildTextFieldReadonly(
-                controller:
-                    TextEditingController(text: formatValue(montantIRVM, 0)),
-                label: 'Montant IRVM'),
-            // Text("Montant IRVM: ${montantIRVM} "),
-            // _buildTextFieldReadonly(
-            //     controller: TextEditingController(
-            //       text: formatValue(montantNet, 0),
-            //     ),
-            //     label: 'Montant Dividende Net'),
-            // Text(isBrutSelected
-            //     ? "Montant Dividende Net: $montantNet"
-            //     : "Montant Dividendes Bruts: ${montantBrut}"),
-            // _buildTextFieldReadonly(
-            //     controller: montantControllerBrut,
-            //     label: 'Montant Dividendes Bruts'),
+              controller: TextEditingController(
+                text: formatValue(montantIRVM, 0),
+              ),
+              label: 'Montant IRVM',
+            ),
+            const SizedBox(height: 20),
             _buildTextFieldReadonly(
-                controller: isBrutSelected
-                    ? TextEditingController(
-                        text: formatValue(montantNet, 0),
-                      )
-                    : TextEditingController(
-                        text: formatValue(montantBrut, 0),
-                      ),
-                label: isBrutSelected
-                    ? 'Montant Dividende Net'
-                    : 'Montant Dividendes Bruts')
+              controller: TextEditingController(
+                text: isBrutSelected
+                    ? formatValue(montantNet, 0)
+                    : formatValue(montantBrut, 0),
+              ),
+              label: isBrutSelected
+                  ? 'Montant Dividende Net'
+                  : 'Montant Dividendes Bruts',
+            ),
           ],
         ),
       ),

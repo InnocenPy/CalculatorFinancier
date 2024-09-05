@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:number_text_input_formatter/number_text_input_formatter.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class TauxDeMargePage extends StatefulWidget {
@@ -38,8 +39,24 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
     super.dispose();
   }
 
+  /// Méthode générique pour obtenir une valeur numérique depuis un contrôleur.
+  double _parseInputValue(TextEditingController controller,
+      {double fallback = 0}) {
+    String cleanedValue =
+        controller.text.replaceAll(RegExp(r"\s+"), "").replaceAll(',', '.');
+    return double.tryParse(cleanedValue) ?? fallback;
+  }
+
   /// Calcul à partir du taux de marge.
   void _calculateFromTauxMarge() {
+    if (prixAchatController.text.isNotEmpty) {
+      String cachat = prixAchatController.text
+          .replaceAll(RegExp(r"\s+"), "")
+          .replaceAll(',', '.');
+      double? achat = double.tryParse(cachat);
+
+      print(achat);
+    }
     double prixAchat = double.tryParse(prixAchatController.text) ?? 0;
     double tauxMarge = (double.tryParse(tauxMargeController.text) ?? 0) / 100;
     double tauxTVA = (double.tryParse(tauxTVAController.text) ?? 0) / 100;
@@ -63,10 +80,11 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
     });
   }
 
+  /// Calcul à partir du prix de vente TTC avec une sécurité renforcée.
   void _calculateFromPrixVenteTTC() {
-    double prixAchat = double.tryParse(prixAchatController.text) ?? 0;
-    double prixVenteTTC = double.tryParse(prixVenteTTCController.text) ?? 0;
-    double tauxTVA = (double.tryParse(tauxTVAController.text) ?? 0) / 100;
+    double prixAchat = _parseInputValue(prixAchatController);
+    double prixVenteTTC = _parseInputValue(prixVenteTTCController);
+    double tauxTVA = _parseInputValue(tauxTVAController) / 100;
 
     // Calcul des valeurs de base
     prixVenteHT = prixVenteTTC / (1 + tauxTVA);
@@ -75,7 +93,6 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
     tauxMarge = (marge / prixVenteHT) * 100;
 
     tauxMargeController.text = formatValue(tauxMarge, 0);
-
     coefficientController.text = formatValue(coefficient, 1);
 
     // Mise à jour des autres valeurs interconnectées
@@ -88,10 +105,11 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
     });
   }
 
+  /// Calcul à partir du coefficient avec une sécurité renforcée.
   void _calculateFromCoefficient() {
-    double prixAchat = double.tryParse(prixAchatController.text) ?? 0;
-    double coefficient = double.tryParse(coefficientController.text) ?? 0;
-    double tauxTVA = (double.tryParse(tauxTVAController.text) ?? 0) / 100;
+    double prixAchat = _parseInputValue(prixAchatController);
+    double coefficient = _parseInputValue(coefficientController);
+    double tauxTVA = _parseInputValue(tauxTVAController) / 100;
 
     // Calcul des valeurs de base
     prixVenteHT = prixAchat * coefficient / (1 + tauxTVA);
@@ -208,6 +226,20 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
               TextField(
                 controller: prixAchatController,
                 keyboardType: TextInputType.number,
+                inputFormatters: [
+                  NumberTextInputFormatter(
+                    integerDigits: 10,
+                    decimalDigits: 2,
+                    maxValue: '10000000000.00',
+                    decimalSeparator: ',',
+                    groupDigits: 3,
+                    groupSeparator: ' ',
+                    allowNegative: false,
+                    overrideDecimalPoint: false,
+                    insertDecimalPoint: false,
+                    insertDecimalDigits: false,
+                  ),
+                ],
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Prix d\'achat HT',
