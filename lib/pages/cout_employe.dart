@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:number_text_input_formatter/number_text_input_formatter.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class CoutEmployeurPage extends StatefulWidget {
@@ -40,11 +41,32 @@ class _CoutEmployeurPageState extends State<CoutEmployeurPage> {
     super.dispose();
   }
 
-  // Function to calculate "Coût Employeur" from "Salaire Brut"
+  /// Méthode générique pour obtenir une valeur numérique depuis un contrôleur.
+  double _parseInputValue(TextEditingController controller,
+      {double fallback = 0}) {
+    String cleanedValue =
+        controller.text.replaceAll(RegExp(r"\s+"), "").replaceAll(',', '.');
+    return double.tryParse(cleanedValue) ?? fallback;
+  }
+
+  /// Pour formater la valeur avec des espaces
+  String formatValue(double value, int fractionDigits) {
+    return NumberFormat.currency(
+      locale: 'fr_FR',
+      symbol: '',
+      decimalDigits: fractionDigits,
+    ).format(value);
+  }
+
+// Function to calculate "Coût Employeur" from "Salaire Brut"
   void _calculateCoutEmployeurFromBrut() {
-    double B3 = double.tryParse(salaireBrutController.text) ?? 0;
-    double B5 = double.tryParse(rubriquesNonSoumisesController.text) ?? 0;
+    double B3 = _parseInputValue(salaireBrutController);
+    double B5 = _parseInputValue(rubriquesNonSoumisesController);
     double B4 = tauxAccidentTravail ?? 0;
+
+    if (B3 <= 0 || B5 < 0 || B4 < 0) {
+      return; // Vérifications de sécurité
+    }
 
     double coutEmployeur = B3 + ((B3 - B5) * (0.179 + B4)) + (B3 * 0.045);
     setState(() {
@@ -52,12 +74,16 @@ class _CoutEmployeurPageState extends State<CoutEmployeurPage> {
     });
   }
 
-  // Function to calculate "Coût Employeur" from "Salaire Net" and update "Salaire Brut"
+// Function to calculate "Coût Employeur" from "Salaire Net" and update "Salaire Brut"
   void _calculateCoutEmployeurFromNet() {
-    double B12 = double.tryParse(salaireNetController.text) ?? 0;
-    double B11 = double.tryParse(rubriquesNonSoumisesController.text) ?? 0;
-    double B10 = double.tryParse(avantageNatureController.text) ?? 0;
+    double B12 = _parseInputValue(salaireNetController);
+    double B11 = _parseInputValue(rubriquesNonSoumisesController);
+    double B10 = _parseInputValue(avantageNatureController);
     double B13 = tauxAccidentTravailNet ?? 0;
+
+    if (B12 <= 0 || B11 < 0 || B10 < 0 || B13 < 0) {
+      return; // Vérifications de sécurité
+    }
 
     // Calculate Salaire Brut
     double salaireBrut = (B12 + B10 + (-B11 * 0.0666)) / 0.9334;
@@ -71,12 +97,16 @@ class _CoutEmployeurPageState extends State<CoutEmployeurPage> {
     });
   }
 
-  // Function to calculate "Salaire Brut" and "Salaire Net" from "Coût Employeur"
+// Function to calculate "Salaire Brut" and "Salaire Net" from "Coût Employeur"
   void _calculateSalaireFromCoutEmployeur() {
-    double B17 = double.tryParse(coutEmployeurController.text) ?? 0;
-    double B19 = double.tryParse(rubriquesNonSoumisesController.text) ?? 0;
-    double B20 = double.tryParse(avantageNatureController.text) ?? 0;
+    double B17 = _parseInputValue(coutEmployeurController);
+    double B19 = _parseInputValue(rubriquesNonSoumisesController);
+    double B20 = _parseInputValue(avantageNatureController);
     double B18 = tauxAccidentTravailCout ?? 0;
+
+    if (B17 <= 0 || B19 < 0 || B20 < 0 || B18 < 0) {
+      return; // Vérifications de sécurité
+    }
 
     double salaireBrut =
         (B17 + ((0.179 + B18) * B19)) / (1 + (0.179 + B18) + 0.045);
@@ -101,9 +131,21 @@ class _CoutEmployeurPageState extends State<CoutEmployeurPage> {
   }) {
     return TextField(
       controller: controller,
-      // keyboardType: TextInputType.number,
-      keyboardType: TextInputType.numberWithOptions(decimal: true),
-
+      keyboardType: TextInputType.number,
+      inputFormatters: [
+        NumberTextInputFormatter(
+          integerDigits: 10,
+          decimalDigits: 2,
+          maxValue: '10000000000.00',
+          decimalSeparator: ',',
+          groupDigits: 3,
+          groupSeparator: ' ',
+          allowNegative: false,
+          overrideDecimalPoint: false,
+          insertDecimalPoint: false,
+          insertDecimalDigits: false,
+        ),
+      ],
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: label,
@@ -152,19 +194,6 @@ class _CoutEmployeurPageState extends State<CoutEmployeurPage> {
         ),
       ],
     );
-  }
-
-  String formatValue(double value, int decimalPlaces) {
-    // Vérifier si la valeur est NaN (Not a Number) ou infinie
-    if (value.isNaN || value.isInfinite) {
-      return '0';
-    }
-
-    // Arrondir la valeur au nombre de décimales spécifié
-    double roundedValue = double.parse(value.toStringAsFixed(decimalPlaces));
-
-    // Formater la valeur arrondie avec le séparateur de milliers
-    return NumberFormat.decimalPattern('fr').format(roundedValue);
   }
 
   Widget _buildDropdown({

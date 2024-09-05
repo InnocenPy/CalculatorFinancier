@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:number_text_input_formatter/number_text_input_formatter.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 
 class CalculSalairePage extends StatefulWidget {
@@ -27,22 +29,58 @@ class _CalculSalairePageState extends State<CalculSalairePage> {
     super.dispose();
   }
 
-  void _calculateFromBrut() {
-    double B3 = double.tryParse(salaireBrutController.text) ?? 0;
-    double B4 = double.tryParse(avantageNatureController.text) ?? 0;
-    double B5 = double.tryParse(rubriquesNonSoumisesController.text) ?? 0;
+  /// Méthode générique pour obtenir une valeur numérique depuis un contrôleur.
+  double _parseInputValue(TextEditingController controller,
+      {double fallback = 0}) {
+    String cleanedValue =
+        controller.text.replaceAll(RegExp(r"\s+"), "").replaceAll(',', '.');
+    return double.tryParse(cleanedValue) ?? fallback;
+  }
 
-    double net = B3 - ((B3 - B5) * 0.0666) - B4;
-    salaireNetController.text = net.toStringAsFixed(2);
+  String formatValue(double value, int fractionDigits) {
+    return NumberFormat.currency(
+      locale: 'fr_FR',
+      symbol: '',
+      decimalDigits: fractionDigits,
+    ).format(value);
+  }
+
+  void _calculateFromBrut() {
+    if (salaireBrutController.text.isNotEmpty &&
+        avantageNatureController.text.isNotEmpty &&
+        rubriquesNonSoumisesController.text.isNotEmpty) {
+      double B3 = _parseInputValue(salaireBrutController);
+      double B4 = _parseInputValue(avantageNatureController);
+      double B5 = _parseInputValue(rubriquesNonSoumisesController);
+
+      // Vérifications de sécurité pour éviter des erreurs de calcul
+      if (B3 <= 0 || B4 < 0 || B5 < 0) {
+        return; // Stop si les valeurs ne sont pas valides
+      }
+
+      double net = B3 - ((B3 - B5) * 0.0666) - B4;
+      // salaireNetController.text = net.toStringAsFixed(2);
+      salaireNetController.text = formatValue(net, 2);
+    }
   }
 
   void _calculateFromNet() {
-    double B10 = double.tryParse(salaireNetController.text) ?? 0;
-    double B11 = double.tryParse(avantageNatureController.text) ?? 0;
-    double B12 = double.tryParse(rubriquesNonSoumisesController.text) ?? 0;
+    if (salaireNetController.text.isNotEmpty &&
+        avantageNatureController.text.isNotEmpty &&
+        rubriquesNonSoumisesController.text.isNotEmpty) {
+      double B10 = _parseInputValue(salaireNetController);
+      double B11 = _parseInputValue(avantageNatureController);
+      double B12 = _parseInputValue(rubriquesNonSoumisesController);
 
-    double brut = (B10 + B11 + (-B12 * 0.0666)) / 0.9334;
-    salaireBrutController.text = brut.toStringAsFixed(2);
+      // Vérifications de sécurité pour éviter des erreurs de calcul
+      if (B10 <= 0 || B11 < 0 || B12 < 0) {
+        return; // Stop si les valeurs ne sont pas valides
+      }
+
+      double brut = (B10 + B11 + (-B12 * 0.0666)) / 0.9334;
+      // salaireBrutController.text = brut.toStringAsFixed(2);
+      salaireBrutController.text = formatValue(brut, 2);
+    }
   }
 
   void _onToggleSwitch(int index) {
@@ -64,6 +102,20 @@ class _CalculSalairePageState extends State<CalculSalairePage> {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
+      inputFormatters: [
+        NumberTextInputFormatter(
+          integerDigits: 10,
+          decimalDigits: 2,
+          maxValue: '10000000000.00',
+          decimalSeparator: ',',
+          groupDigits: 3,
+          groupSeparator: ' ',
+          allowNegative: false,
+          overrideDecimalPoint: false,
+          insertDecimalPoint: false,
+          insertDecimalDigits: false,
+        ),
+      ],
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
         labelText: label,
@@ -191,7 +243,7 @@ class _CalculSalairePageState extends State<CalculSalairePage> {
               ),
               const SizedBox(height: 40),
               _buildTextFieldReadonly(
-                  controller:  salaireBrutController, label: 'Salaire Brut')
+                  controller: salaireBrutController, label: 'Salaire Brut')
             ],
           ],
         ),

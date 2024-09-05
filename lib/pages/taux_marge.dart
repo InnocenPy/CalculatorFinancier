@@ -50,34 +50,38 @@ class _TauxDeMargePageState extends State<TauxDeMargePage> {
   /// Calcul à partir du taux de marge.
   void _calculateFromTauxMarge() {
     if (prixAchatController.text.isNotEmpty) {
-      String cachat = prixAchatController.text
-          .replaceAll(RegExp(r"\s+"), "")
-          .replaceAll(',', '.');
-      double? achat = double.tryParse(cachat);
+      // String cachat = prixAchatController.text
+      //     .replaceAll(RegExp(r"\s+"), "")
+      //     .replaceAll(',', '.');
+      // double achat = double.tryParse(cachat) ?? 0;
 
-      print(achat);
+      // print(achat);
+      if (tauxMargeController.text.isNotEmpty) {
+        if (tauxTVAController.text.isNotEmpty) {
+          double prixAchat = _parseInputValue(prixAchatController) ?? 0;
+          double tauxMarge = _parseInputValue(tauxMargeController) / 100;
+          double tauxTVA = _parseInputValue(tauxTVAController) / 100;
+
+          // Calcul des valeurs de base
+          prixVenteHT = prixAchat / (1 - tauxMarge);
+          prixVenteTTC = prixVenteHT * (1 + tauxTVA);
+          marge = prixVenteHT - prixAchat;
+          coefficient = prixVenteTTC / prixAchat;
+
+          prixVenteTTCController.text = formatValue(prixVenteTTC, 0);
+          // prixVenteHTController.text = formatValue(prixVenteHT, 0);
+
+          // Mise à jour des autres valeurs interconnectées
+          setState(() {
+            this.prixVenteHT = prixVenteHT;
+            this.prixVenteTTC = prixVenteTTC;
+            this.marge = marge;
+            this.coefficient = coefficient;
+            this.tauxMarge = tauxMarge * 100; // Conversion en pourcentage
+          });
+        }
+      }
     }
-    double prixAchat = double.tryParse(prixAchatController.text) ?? 0;
-    double tauxMarge = (double.tryParse(tauxMargeController.text) ?? 0) / 100;
-    double tauxTVA = (double.tryParse(tauxTVAController.text) ?? 0) / 100;
-
-    // Calcul des valeurs de base
-    prixVenteHT = prixAchat / (1 - tauxMarge);
-    prixVenteTTC = prixVenteHT * (1 + tauxTVA);
-    marge = prixVenteHT - prixAchat;
-    coefficient = prixVenteTTC / prixAchat;
-
-    prixVenteTTCController.text = formatValue(prixVenteTTC, 0);
-    // prixVenteHTController.text = formatValue(prixVenteHT, 0);
-
-    // Mise à jour des autres valeurs interconnectées
-    setState(() {
-      this.prixVenteHT = prixVenteHT;
-      this.prixVenteTTC = prixVenteTTC;
-      this.marge = marge;
-      this.coefficient = coefficient;
-      this.tauxMarge = tauxMarge * 100; // Conversion en pourcentage
-    });
   }
 
   /// Calcul à partir du prix de vente TTC avec une sécurité renforcée.
